@@ -44,6 +44,12 @@ if (!(
     process.exit()
 }
 
+if (!(
+    fs.existsSync(path.join(__dirname, args[0]))
+)) {
+    throw new ReferenceError('Reference path does not exist')
+}
+
 // DEPENDENT
 const usepath = path.join(__dirname, args[0])
 const formats = []
@@ -68,33 +74,37 @@ const formats = []
         }
     )()
 
-    ; (
-        function run() {
-            const data = JSON.parse(fs.readFileSync(path.join(usepath, 'data.json')))
-            const school = args[0]
+if (!formats.length) {
+    throw new SyntaxError('No output formats specified')
+}
 
-            let outjson = formats.includes('json') ? [] : undefined
-            let outtext = formats.includes('text') ? '' : undefined
-            let outcsv = formats.includes('csv') ? 'name,school\n' : undefined
+; (
+    function run() {
+        const data = JSON.parse(fs.readFileSync(path.join(usepath, 'data.json')))
+        const school = args[0]
 
-            for (const dataset of data)
-                for (const datalist of dataset['data'])
-                    for (const entry of datalist) {
-                        const name = entry['text'].replace(/^([\W]+) (.+)$/gm, '$2') // remove charms (if applicable)
+        let outjson = formats.includes('json') ? [] : undefined
+        let outtext = formats.includes('text') ? '' : undefined
+        let outcsv = formats.includes('csv') ? 'name,school\n' : undefined
 
-                        if (outjson !== undefined)
-                            outjson.push(name)
-                        if (outtext !== undefined)
-                            outtext += `${name}\n`
-                        if (outcsv !== undefined)
-                            outcsv += `${name},${school}\n`
-                    }
+        for (const dataset of data)
+            for (const datalist of dataset['data'])
+                for (const entry of datalist) {
+                    const name = entry['text'].replace(/^([\W]+) (.+)$/gm, '$2') // remove charms (if applicable)
 
-            if (outjson)
-                fs.writeFileSync(path.join(usepath, school + '-array.json'), JSON.stringify(outjson))
-            if (outtext)
-                fs.writeFileSync(path.join(usepath, school + '-list.txt'), outtext)
-            if (outcsv)
-                fs.writeFileSync(path.join(usepath, school + '.csv'), outcsv)
-        }
-    )()
+                    if (outjson !== undefined)
+                        outjson.push(name)
+                    if (outtext !== undefined)
+                        outtext += `${name}\n`
+                    if (outcsv !== undefined)
+                        outcsv += `${name},${school}\n`
+                }
+
+        if (outjson)
+            fs.writeFileSync(path.join(usepath, school + '-array.json'), JSON.stringify(outjson))
+        if (outtext)
+            fs.writeFileSync(path.join(usepath, school + '-list.txt'), outtext)
+        if (outcsv)
+            fs.writeFileSync(path.join(usepath, school + '.csv'), outcsv)
+    }
+)()
