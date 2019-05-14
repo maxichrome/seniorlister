@@ -58,53 +58,57 @@ const formats = []
         function findFormats() {
             if (
                 args.includes('-c') || args.includes('--csv')
-            ) {
+            )
                 formats.push('csv')
-            }
+
             if (
                 args.includes('-l') || args.includes('--list')
-            ) {
+            )
                 formats.push('json')
-            }
+
             if (
                 args.includes('-t') || args.includes('--text')
-            ) {
+            )
                 formats.push('text')
-            }
         }
     )()
 
-if (!formats.length) {
-    throw new SyntaxError('No output formats specified')
-}
+    ; (
+        function run() {
+            if (!formats.length)
+                throw new SyntaxError('No output formats specified')
 
-; (
-    function run() {
-        const data = JSON.parse(fs.readFileSync(path.join(usepath, 'data.json')))
-        const school = args[0]
+            const data = JSON.parse(fs.readFileSync(path.join(usepath, 'data.json')))
+            const school = args[0]
 
-        let outjson = formats.includes('json') ? [] : undefined
-        let outtext = formats.includes('text') ? '' : undefined
-        let outcsv = formats.includes('csv') ? 'name,school\n' : undefined
+            let names = []
+            let outjson = formats.includes('json') ? [] : undefined
+            let outtext = formats.includes('text') ? '' : undefined
+            let outcsv = formats.includes('csv') ? 'name,school\n' : undefined
 
-        for (const dataset of data)
-            for (const datalist of dataset['data'])
-                for (const entry of datalist) {
-                    const name = entry['text'].replace(/^([\W]+) (.+)$/gm, '$2') // remove charms (if applicable)
+            for (const dataset of data)
+                for (const datalist of dataset['data'])
+                    for (const entry of datalist) {
+                        const name = entry['text'].replace(/^([\W]+) (.+)$/gm, '$2') // remove charms (if applicable)
+                        names.push(name)
+                    }
 
-                    if (outjson !== undefined)
-                        outjson.push(name)
-                    if (outtext !== undefined)
-                        outtext += `${name}\n`
-                    if (outcsv !== undefined)
-                        outcsv += `${name},${school}\n`
-                }
+            names = names.sort()
 
-        if (outjson)
-            fs.writeFileSync(path.join(usepath, school + '-array.json'), JSON.stringify(outjson))
-        if (outtext)
-            fs.writeFileSync(path.join(usepath, school + '-list.txt'), outtext)
-        if (outcsv)
-            fs.writeFileSync(path.join(usepath, school + '.csv'), outcsv)
-    }
-)()
+            for (const name of names) {
+                if (formats.includes('json'))
+                    outjson.push(name)
+                if (formats.includes('text'))
+                    outtext += `${name}\n`
+                if (formats.includes('csv'))
+                    outcsv += `${name},${school}\n`
+            }
+
+            if (outjson)
+                fs.writeFileSync(path.join(usepath, school + '-array.json'), JSON.stringify(outjson))
+            if (outtext)
+                fs.writeFileSync(path.join(usepath, school + '-list.txt'), outtext)
+            if (outcsv)
+                fs.writeFileSync(path.join(usepath, school + '.csv'), outcsv)
+        }
+    )()
