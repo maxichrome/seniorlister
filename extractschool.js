@@ -95,7 +95,7 @@ const formats = []
 
             names = names.sort()
 
-            for (const name of names) {
+            for (let name of names) {
                 if (formats.includes('json'))
                     outjson.push(name)
                 if (formats.includes('text'))
