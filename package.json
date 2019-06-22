@@ -1,7 +1,7 @@
 {
-  "name": "graduation-extractor",
-  "version": "1.0.0",
-  "main": "extractschool.js",
-  "author": "hadenfletcher",
-  "license": "GPL-3.0-only"
+    "name": "graduation-extractor",
+    "version": "1.0.0",
+    "main": "src/extractschool.js",
+    "author": "hadenfletcher",
+    "license": "GPL-3.0-only"
 }
